@@ -2,14 +2,20 @@ import { useEffect, useState } from "react";
 import { Avatar, Button, Typography } from "@mui/material";
 import { deepPurple } from "@mui/material/colors";
 import { FaRobot } from "react-icons/fa";
+import { CheckCircle, Refresh } from "@mui/icons-material";
 import { getHumidity } from "./firebaseConfig"; // <-- import ici
 
 export default function ChatBot() {
   const [messages, setMessages] = useState([]);
   const [waitingForOK, setWaitingForOK] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // pour montrer que ça charge
 
   const checkHumidity = async () => {
-    const humidite = await getHumidity(); // 📡 lecture depuis Firebase
+    setIsLoading(true); // démarrage du chargement
+
+    const humidite = await getHumidity();
+
+    setIsLoading(false); // fin du chargement
 
     if (humidite === null) {
       setMessages((prev) => [...prev, { from: "bot", text: "❌ Erreur lors de la lecture de l’humidité." }]);
@@ -69,16 +75,52 @@ export default function ChatBot() {
             </div>
           </div>
         ))}
+
+        {isLoading && (
+          <div className="text-center text-sm text-gray-500 italic">⏳ Lecture des données...</div>
+        )}
       </div>
 
       <div className="mt-4">
         {waitingForOK ? (
-          <Button fullWidth variant="contained" className="bg-blue-600" onClick={handleOK}>
-            OK
+          <Button
+            fullWidth
+            variant="contained"
+            startIcon={<CheckCircle />}
+            sx={{
+              backgroundColor: "#4CAF50",
+              color: "#fff",
+              borderRadius: "9999px",
+              textTransform: "none",
+              fontWeight: "bold",
+              '&:hover': {
+                backgroundColor: "#45A049",
+              },
+            }}
+            onClick={handleOK}
+          >
+            OK, j’ai noté !
           </Button>
         ) : (
-          <Button fullWidth variant="outlined" className="text-blue-600 border-blue-600" onClick={checkHumidity}>
-            Relancer la vérification
+          <Button
+            fullWidth
+            variant="outlined"
+            startIcon={<Refresh />}
+            sx={{
+              borderColor: "#2196F3",
+              color: "#2196F3",
+              borderRadius: "9999px",
+              textTransform: "none",
+              fontWeight: "bold",
+              '&:hover': {
+                backgroundColor: "#E3F2FD",
+                borderColor: "#1976D2",
+              },
+            }}
+            onClick={checkHumidity}
+            disabled={isLoading}
+          >
+            Vérifier à nouveau
           </Button>
         )}
       </div>

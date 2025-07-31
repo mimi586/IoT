@@ -21,7 +21,7 @@ const database = getDatabase(app); // <-- on initialise bien la base de données
 // ✅ Fonction pour récupérer l’humidité depuis Firebase
 export const getHumidity = async () => {
   try {
-    const snapshot = await get(ref(database, "/sensor/humidity"));
+    const snapshot = await get(ref(database, "/capteurs/humidite"));
     if (snapshot.exists()) {
       return snapshot.val();
     } else {
