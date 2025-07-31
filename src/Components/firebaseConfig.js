@@ -1,7 +1,7 @@
 // ✅ Importation des fonctions nécessaires
 import { initializeApp } from "firebase/app";
-import { getDatabase, ref, get } from "firebase/database"; // <-- Ces imports manquaient
-
+import { getDatabase, ref } from "firebase/database"; // <-- Ces imports manquaient
+import { onValue } from "firebase/database";
 // 🔧 Ta configuration Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyBVEItpTW9MRYedRzXnO3BAmb5xkKJRpEY",
@@ -18,17 +18,17 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app); // <-- on initialise bien la base de données
 
-// ✅ Fonction pour récupérer l’humidité depuis Firebase
-export const getHumidity = async () => {
-  try {
-    const snapshot = await get(ref(database, "/capteurs/humidite"));
+export const listenToHumidity = (callback) => {
+  const humidityRef = ref(database, "/capteurs/humidite");
+
+  onValue(humidityRef, (snapshot) => {
     if (snapshot.exists()) {
-      return snapshot.val();
+      callback(snapshot.val());
     } else {
-      throw new Error("Pas de donnée trouvée !");
+      callback(null);
     }
-  } catch (error) {
-    console.error("Erreur Firebase :", error);
-    return null;
-  }
+  }, (error) => {
+    console.error("Erreur d'écoute de l'humidité :", error);
+    callback(null);
+  });
 };
