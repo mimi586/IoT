@@ -2,28 +2,27 @@ import { useEffect, useState } from "react";
 import { Avatar, Button, Typography } from "@mui/material";
 import { deepPurple } from "@mui/material/colors";
 import { FaRobot } from "react-icons/fa";
-import { CheckCircle } from "@mui/icons-material";
-import { listenToHumidity } from "./firebaseConfig";
-
+import { CheckCircle, Refresh } from "@mui/icons-material";
+import { getHumidity } from "./firebaseConfig"; // <-- import ici
 
 export default function ChatBot() {
   const [messages, setMessages] = useState([]);
   const [waitingForOK, setWaitingForOK] = useState(false);
-  const [latestHumidity, setLatestHumidity] = useState(null);
+  const [isLoading, setIsLoading] = useState(false); // pour montrer que ça charge
 
-  // 👂 Écoute les changements d'humidité
-  useEffect(() => {
-    listenToHumidity((newHumidity) => {
-      if (newHumidity !== null && newHumidity !== latestHumidity) {
-        handleBotResponse(newHumidity);
-        setLatestHumidity(newHumidity);
-      }
-    });
-  }, [latestHumidity]);
+  const checkHumidity = async () => {
+    setIsLoading(true); // démarrage du chargement
 
-  const handleBotResponse = (humidite) => {
+    const humidite = await getHumidity();
+
+    setIsLoading(false); // fin du chargement
+
+    if (humidite === null) {
+      setMessages((prev) => [...prev, { from: "bot", text: "❌ Erreur lors de la lecture de l’humidité." }]);
+      return;
+    }
+
     let response = "";
-
     if (humidite < 30) {
       response = `🌧️ Humidité : ${humidite}%\nVeuillez arroser vos plantes !`;
     } else if (humidite < 60) {
@@ -33,9 +32,15 @@ export default function ChatBot() {
     }
 
     setMessages((prev) => [...prev, { from: "bot", text: response }]);
-    
     setWaitingForOK(true);
   };
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      checkHumidity();
+    }, 1000);
+    return () => clearTimeout(timeout);
+  }, []);
 
   const handleOK = () => {
     setMessages((prev) => [...prev, { from: "user", text: "✅ OK, j’ai noté." }]);
@@ -70,10 +75,14 @@ export default function ChatBot() {
             </div>
           </div>
         ))}
+
+        {isLoading && (
+          <div className="text-center text-sm text-gray-500 italic">⏳ Lecture des données...</div>
+        )}
       </div>
 
       <div className="mt-4">
-        {waitingForOK && (
+        {waitingForOK ? (
           <Button
             fullWidth
             variant="contained"
@@ -91,6 +100,27 @@ export default function ChatBot() {
             onClick={handleOK}
           >
             OK, j’ai noté !
+          </Button>
+        ) : (
+          <Button
+            fullWidth
+            variant="outlined"
+            startIcon={<Refresh />}
+            sx={{
+              borderColor: "#2196F3",
+              color: "#2196F3",
+              borderRadius: "9999px",
+              textTransform: "none",
+              fontWeight: "bold",
+              '&:hover': {
+                backgroundColor: "#E3F2FD",
+                borderColor: "#1976D2",
+              },
+            }}
+            onClick={checkHumidity}
+            disabled={isLoading}
+          >
+            Vérifier à nouveau
           </Button>
         )}
       </div>
