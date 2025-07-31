@@ -2,13 +2,19 @@ import { useEffect, useState } from "react";
 import { Avatar, Button, Typography } from "@mui/material";
 import { deepPurple } from "@mui/material/colors";
 import { FaRobot } from "react-icons/fa";
+import { getHumidity } from "./firebaseConfig"; // <-- import ici
 
 export default function ChatBot() {
   const [messages, setMessages] = useState([]);
   const [waitingForOK, setWaitingForOK] = useState(false);
 
-  const checkHumidity = () => {
-    const humidite = 5; // 🌡️ donnée statique
+  const checkHumidity = async () => {
+    const humidite = await getHumidity(); // 📡 lecture depuis Firebase
+
+    if (humidite === null) {
+      setMessages((prev) => [...prev, { from: "bot", text: "❌ Erreur lors de la lecture de l’humidité." }]);
+      return;
+    }
 
     let response = "";
     if (humidite < 30) {
@@ -41,14 +47,11 @@ export default function ChatBot() {
         🤖 Assistant Jardin – Chat IA
       </Typography>
 
-      {/* Zone de chat */}
       <div className="h-72 overflow-y-auto p-3 bg-[#f0f2f5] rounded-lg space-y-3">
         {messages.map((msg, index) => (
           <div
             key={index}
-            className={`flex ${
-              msg.from === "user" ? "justify-end" : "justify-start"
-            }`}
+            className={`flex ${msg.from === "user" ? "justify-end" : "justify-start"}`}
           >
             {msg.from === "bot" && (
               <Avatar sx={{ bgcolor: deepPurple[500], width: 30, height: 30, mr: 1 }}>
@@ -68,24 +71,13 @@ export default function ChatBot() {
         ))}
       </div>
 
-      {/* Bouton d'action */}
       <div className="mt-4">
         {waitingForOK ? (
-          <Button
-            fullWidth
-            variant="contained"
-            className="bg-blue-600"
-            onClick={handleOK}
-          >
+          <Button fullWidth variant="contained" className="bg-blue-600" onClick={handleOK}>
             OK
           </Button>
         ) : (
-          <Button
-            fullWidth
-            variant="outlined"
-            className="text-blue-600 border-blue-600"
-            onClick={checkHumidity}
-          >
+          <Button fullWidth variant="outlined" className="text-blue-600 border-blue-600" onClick={checkHumidity}>
             Relancer la vérification
           </Button>
         )}
