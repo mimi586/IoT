@@ -42,7 +42,7 @@ export default function ChatBot() {
     return () => clearTimeout(timeout);
   }, []);
 const handleOK = () => {
-  setMessages((prev) => [...prev, { from: "user", text: "✅ OK, j’ai noté." }]);
+  setMessages((prev) => [...prev, { from: "user" }]);
   setWaitingForOK(false);
 
   // Relancer automatiquement la vérification
