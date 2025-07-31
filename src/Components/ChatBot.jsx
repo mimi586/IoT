@@ -33,7 +33,7 @@ export default function ChatBot() {
     }
 
     setMessages((prev) => [...prev, { from: "bot", text: response }]);
-   
+    
     setWaitingForOK(true);
   };
 
