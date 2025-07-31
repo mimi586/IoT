@@ -41,11 +41,16 @@ export default function ChatBot() {
     }, 1000);
     return () => clearTimeout(timeout);
   }, []);
+const handleOK = () => {
+  setMessages((prev) => [...prev, { from: "user", text: "✅ OK, j’ai noté." }]);
+  setWaitingForOK(false);
 
-  const handleOK = () => {
-    setMessages((prev) => [...prev, { from: "user", text: "✅ OK, j’ai noté." }]);
-    setWaitingForOK(false);
-  };
+  // Relancer automatiquement la vérification
+  setTimeout(() => {
+    checkHumidity();
+  }, 1000); // petit délai pour lisibilité
+};
+
 
   return (
     <div className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full mx-auto mt-10 border">
