@@ -43,9 +43,15 @@ export default function ChatBot() {
   }, []);
 
   const handleOK = () => {
-    setMessages((prev) => [...prev, { from: "user", text: "✅ OK, j’ai noté." }]);
-    setWaitingForOK(false);
-  };
+  setMessages((prev) => [...prev, { from: "user", text: "✅ OK, j’ai noté." }]);
+  setWaitingForOK(false);
+
+  // Relance automatique après 1 seconde
+  setTimeout(() => {
+    checkHumidity();
+  }, 1000);
+};
+
 
   return (
     <div className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full mx-auto mt-10 border">
