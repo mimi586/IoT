@@ -2,7 +2,7 @@
 import { initializeApp } from "firebase/app";
 import { getDatabase, ref } from "firebase/database"; // <-- Ces imports manquaient
 import { onValue } from "firebase/database";
-// 🔧 Ta configuration Firebase
+
 const firebaseConfig = {
   apiKey: "AIzaSyBVEItpTW9MRYedRzXnO3BAmb5xkKJRpEY",
   authDomain: "iot-dev-4c2ed.firebaseapp.com",
